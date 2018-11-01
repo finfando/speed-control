@@ -18,8 +18,7 @@ public class VehicleTelematics {
 		@SuppressWarnings("serial")
 		SingleOutputStreamOperator<Tuple6<Integer,Integer,Long,Integer,Integer,Integer>> speedRadar = source.map(new MapImplementation()).filter(new SpeedRadar()).map(new FlatMapOutput());
 		speedRadar.writeAsCsv(outFilePath, WriteMode.OVERWRITE);
-		
-		
+
 				
 		try {
 			 env.execute();
