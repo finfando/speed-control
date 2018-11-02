@@ -8,7 +8,11 @@ import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
-public class AverageSpeedControl implements WindowFunction<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>, String, String, TimeWindow> {
+import java.util.Iterator;
+
+public class AverageSpeedControl implements WindowFunction<
+        Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>, Tuple4<Integer, Integer, Integer, Integer>,
+        Tuple, TimeWindow> {
     @Override
     public void apply(Tuple key, TimeWindow window, Iterable<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>> input,
                       Collector<Tuple4<Integer, Integer, Integer, Integer>> out) throws Exception {
