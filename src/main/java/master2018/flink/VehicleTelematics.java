@@ -49,7 +49,7 @@ public class VehicleTelematics {
                         })
                 .keyBy(1);
 
-        SingleOutputStreamOperator<Tuple4<Integer, Integer, Integer, Double>> result = keyedStream
+        SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Long, Boolean, Double>> result = keyedStream
                 .window(EventTimeSessionWindows.withGap(Time.minutes(1)))
                 .apply(new AverageSpeedControl());
 //        Time1, Time2, VID, XWay, Dir, AvgSpd
