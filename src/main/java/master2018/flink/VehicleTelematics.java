@@ -1,6 +1,7 @@
 package master2018.flink;
 
 import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.java.tuple.*;
 import org.apache.flink.core.fs.FileSystem;
@@ -46,19 +47,21 @@ public class VehicleTelematics {
                                 return element.f0*1000;
                             }
                         })
-                .keyBy(1);
+                .keyBy(2);
 
-        SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>> result = keyedStream
+        SingleOutputStreamOperator<Tuple4<Integer, Integer, Integer, Integer>> result = keyedStream
                 .window(EventTimeSessionWindows.withGap(Time.minutes(1)))
-                .reduce(new ReduceFunction<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>>() {
-                    @Override
-                    public Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> reduce(
-                            Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> v1,
-                            Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> v2) throws Exception {
-                        Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> out = new Tuple8<>(v1.f0, v1.f1, v1.f2, v1.f3, v1.f4, v1.f5, v1.f6, v1.f7);
-                        return out;
-                    }
-                });
+                .apply(new AverageSpeedControl());
+//                .reduce(new ReduceFunction<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>>() {
+//                    @Override
+//                    public Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> reduce(
+//                            Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> v1,
+//                            Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> v2) throws Exception {
+//                        Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> out = new Tuple8<>(v1.f0, v1.f1, v1.f2, v1.f3, v1.f4, v1.f5, v1.f6, v1.f7);
+//                        return out;
+//                    }
+//                });
+//        Time1, Time2, VID, XWay, Dir, AvgSpd
         result.writeAsCsv(args[1] + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE);
 
 
