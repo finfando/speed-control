@@ -39,7 +39,7 @@ public class AverageSpeedControl implements WindowFunction<
             distance = Math.abs(pos1-pos2);
             seg2 = next.f6;
         }
-        if ((seg1==52 || seg1==56) && (seg2==52 || seg2==56)) {
+        if ((seg1==52 || seg1==56) && (seg2==52 || seg2==56) && (seg1!=seg2)) {
             out.collect(new Tuple4<>(time1, time2, vid, distance));
         }
 //        long count = 0;
