@@ -47,7 +47,7 @@ public class VehicleTelematics {
                                 return element.f0*1000;
                             }
                         })
-                .keyBy(2);
+                .keyBy(1);
 
         SingleOutputStreamOperator<Tuple4<Integer, Integer, Integer, Integer>> result = keyedStream
                 .window(EventTimeSessionWindows.withGap(Time.minutes(1)))

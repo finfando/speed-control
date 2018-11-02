@@ -18,24 +18,30 @@ public class AverageSpeedControl implements WindowFunction<
                       Collector<Tuple4<Integer, Integer, Integer, Integer>> out) throws Exception {
         Iterator<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>> iterator = input.iterator();
         Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> first = iterator.next();
-        Integer time1 = null;
+        Integer time1 = 0;
         Integer time2 = 0;
-        Integer vid = null;
+        Integer vid = 0;
         Integer pos1 = 0;
         Integer pos2 = 0;
         Integer distance = 0;
+        Integer seg1 = 0;
+        Integer seg2 = 0;
         if(first != null){
             time1 = first.f0;
             vid = first.f1;
             pos1 = first.f7;
+            seg1 = first.f6;
         }
         while(iterator.hasNext()){
             Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> next = iterator.next();
             time2 = next.f0;
             pos2 = next.f7;
             distance = Math.abs(pos1-pos2);
+            seg2 = next.f6;
         }
-        out.collect(new Tuple4<>(time1, time2, vid, distance));
+        if ((seg1==52 || seg1==56) && (seg2==52 || seg2==56)) {
+            out.collect(new Tuple4<>(time1, time2, vid, distance));
+        }
 //        long count = 0;
 //        for (Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> in: input) {
 //            count++;
