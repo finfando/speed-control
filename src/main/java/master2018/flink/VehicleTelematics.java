@@ -37,7 +37,26 @@ public class VehicleTelematics {
 
 		DataStreamSource<String> source = env.readTextFile(inFilePath);
 		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>> mapStream = source
-				.map(new MapImplementation());
+				.map(new MapFunction<String, Tuple8<Integer, Integer, Integer,Long,Integer,Boolean,Integer,Integer>>(){
+
+
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> map(String in)
+							throws Exception {
+						String[] fieldArray = in.split(",");
+						Tuple8<Integer, Integer, Integer,Long,Integer,Boolean,Integer,Integer> out = new Tuple8<Integer, Integer, Integer,Long,Integer,Boolean,Integer,Integer>
+						(Integer.parseInt(fieldArray[0]), Integer.parseInt(fieldArray[1]),Integer.parseInt(fieldArray[2]),Long.parseLong(fieldArray[3]),Integer.parseInt(fieldArray[4]),Boolean.valueOf(fieldArray[5]),Integer.parseInt(fieldArray[6]),Integer.parseInt(fieldArray[7]));
+						return out;	
+					}
+					
+					
+					
+				//Time, VID, Spd, XWay, Lane, Dir, Seg, Pos
+					
+				}
+);
 
 		/*
 		 * SingleOutputStreamOperator<Tuple6<Integer,Integer,Long,Integer,Integer,
