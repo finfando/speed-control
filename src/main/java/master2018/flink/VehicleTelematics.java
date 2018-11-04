@@ -24,6 +24,8 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
+import master2018.flink.utils.FilterBySegment;
+
 public class VehicleTelematics {
 	public static void main(String[] args) throws Exception {
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -36,104 +38,38 @@ public class VehicleTelematics {
 		String outFilePath = "/home/yoss/Escritorio";
 
 		DataStreamSource<String> source = env.readTextFile(inFilePath);
-		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>> mapStream = source
-				.map(new MapFunction<String, Tuple8<Integer, Integer, Integer,Long,Integer,Boolean,Integer,Integer>>(){
+		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> mapStream = source
+				.map(new MapImplementation());
 
+		// Time, VID, Spd, XWay, Lane, Dir, Seg, Pos
 
-					private static final long serialVersionUID = 1L;
+		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> speedRadar = mapStream
+				.filter(new SpeedRadar()).map(new FlatMapOutput());
+		speedRadar.writeAsCsv(outFilePath + "/speedfines.csv", FileSystem.WriteMode.OVERWRITE);
 
-					@Override
-					public Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> map(String in)
-							throws Exception {
-						String[] fieldArray = in.split(",");
-						Tuple8<Integer, Integer, Integer,Long,Integer,Boolean,Integer,Integer> out = new Tuple8<Integer, Integer, Integer,Long,Integer,Boolean,Integer,Integer>
-						(Integer.parseInt(fieldArray[0]), Integer.parseInt(fieldArray[1]),Integer.parseInt(fieldArray[2]),Long.parseLong(fieldArray[3]),Integer.parseInt(fieldArray[4]),Boolean.valueOf(fieldArray[5]),Integer.parseInt(fieldArray[6]),Integer.parseInt(fieldArray[7]));
-						return out;	
-					}
-					
-					
-					
-				//Time, VID, Spd, XWay, Lane, Dir, Seg, Pos
-					
-				}
-);
+		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> filteredStream = mapStream
+				.filter(new FilterBySegment());
 
-		/*
-		 * SingleOutputStreamOperator<Tuple6<Integer,Integer,Long,Integer,Integer,
-		 * Integer>> speedRadar = mapStream.filter(new SpeedRadar()).map(new
-		 * FlatMapOutput()); speedRadar.writeAsCsv(outFilePath+ "/speedfines.csv",
-		 * FileSystem.WriteMode.OVERWRITE);
-		 * 
-		 * SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Long, Integer,
-		 * Boolean, Integer, Integer>> filteredStream = mapStream .filter(new
-		 * FilterFunction<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean,
-		 * Integer, Integer>>() {
-		 * 
-		 * @Override public boolean filter(Tuple8<Integer, Integer, Integer, Long,
-		 * Integer, Boolean, Integer, Integer> in) throws Exception { if (in.f6 >= 52 &&
-		 * in.f6 <= 56) { return true; } else { return false; } } });
-		 * 
-		 * KeyedStream<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean,
-		 * Integer, Integer>, Tuple> keyedStream = filteredStream
-		 * .assignTimestampsAndWatermarks( new
-		 * AscendingTimestampExtractor<Tuple8<Integer, Integer, Integer, Long, Integer,
-		 * Boolean, Integer, Integer>>(){
-		 * 
-		 * @Override public long extractAscendingTimestamp(Tuple8<Integer, Integer,
-		 * Integer, Long, Integer, Boolean, Integer, Integer> element) { return
-		 * element.f0*1000; } }) .keyBy(1);
-		 * 
-		 * SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Long, Boolean,
-		 * Double>> result = keyedStream
-		 * .window(EventTimeSessionWindows.withGap(Time.minutes(1))) .apply(new
-		 * AverageSpeedControl()); // Time1, Time2, VID, XWay, Dir, AvgSpd
-		 * result.writeAsCsv(outFilePath + "/avgspeedfines.csv",
-		 * FileSystem.WriteMode.OVERWRITE);
-		 * 
-		 */
-		KeyedStream<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>, Tuple> keyedStreamByVID = mapStream
-				.keyBy(1);
-		SingleOutputStreamOperator<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Boolean>> accidentReporter = keyedStreamByVID
-				.countWindow(4, 1)
-				.apply(new WindowFunction<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>, Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Boolean>, Tuple, GlobalWindow>() {
-
-					@Override
-					public void apply(Tuple key, GlobalWindow window,
-							Iterable<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>> input,
-							Collector<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Boolean>> out)
-							throws Exception {
-
-						System.out.println("  ");
-						System.out.println("TUPLE KEY " + key.toString());
-						System.out.println("input " + input.toString());
-						// collector se va rellenando e itera desde el principio de nuevo
-						Iterator<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>> iterator = input
-								.iterator();
-
-						Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> first = iterator
-								.next();
-
-						int size = Iterators.size(iterator);
-						System.out.println("size " + size);
-						System.out.println("First " + first.toString());
-						int elements = 1;
-
-						while (iterator.hasNext()) {
-							elements++;
-
-							if (elements == 4) {
-								System.out.println("Prueba COUNT " + elements);
+		KeyedStream<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStream = filteredStream
+				.assignTimestampsAndWatermarks(
+						new AscendingTimestampExtractor<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
+							@Override
+							public long extractAscendingTimestamp(
+									Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> element) {
+								return element.f0 * 1000;
 							}
+						})
+				.keyBy(1);
 
-							// tiene un segundo, tercero
-						}
+		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> result = keyedStream
+				.window(EventTimeSessionWindows.withGap(Time.minutes(1))).apply(new AverageSpeedControl()); // Time1,
+																											// Time2,VID,XWay,Dir,AvgSpd
+		result.writeAsCsv(outFilePath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE);
 
-						if (elements == 4) {
-
-						}
-
-					}
-				});
+		KeyedStream<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream
+				.keyBy(1);
+		SingleOutputStreamOperator<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> accidentReporter = keyedStreamByVID
+				.countWindow(4, 1).apply(new AccidentReporter());
 
 		accidentReporter.writeAsCsv(outFilePath + "/accidents.csv", FileSystem.WriteMode.OVERWRITE);
 

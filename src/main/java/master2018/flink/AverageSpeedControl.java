@@ -11,19 +11,19 @@ import org.apache.flink.util.Collector;
 import java.util.Iterator;
 
 public class AverageSpeedControl implements WindowFunction<
-        Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>, Tuple6<Integer, Integer, Integer, Long, Boolean, Double>,
+        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer, Integer, Integer, Integer, Integer, Double>,
         Tuple, TimeWindow> {
     @Override
-    public void apply(Tuple key, TimeWindow window, Iterable<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>> input,
-                      Collector<Tuple6<Integer, Integer, Integer, Long, Boolean, Double>> out) throws Exception {
-        Iterator<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>> iterator = input.iterator();
-        Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> first = iterator.next();
+    public void apply(Tuple key, TimeWindow window, Iterable<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> input,
+                      Collector<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> out) throws Exception {
+        Iterator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> iterator = input.iterator();
+        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> first = iterator.next();
         Integer time1 = 0;
         Integer time2 = 0;
         Double timediff = 0.0;
         Integer vid = 0;
-        Long xway = 0L;
-        Boolean dir = null;
+        Integer xway = 0;
+        Integer dir = 0;
         Integer pos1 = 0;
         Integer pos2 = 0;
         Double avgspeed = 0.0;
@@ -38,7 +38,7 @@ public class AverageSpeedControl implements WindowFunction<
             dir = first.f5;
         }
         while(iterator.hasNext()){
-            Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> next = iterator.next();
+            Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> next = iterator.next();
             time2 = next.f0;
             pos2 = next.f7;
             seg2 = next.f6;

@@ -10,12 +10,12 @@ import org.apache.flink.util.Collector;
 
 //FlatMapFunction that tokenizes a String by whitespace characters and emits all String tokens.
 public class FlatMapOutput
-		implements MapFunction<Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer>, Tuple6<Integer,Integer,Long,Integer,Integer,Integer>> {
+		implements MapFunction<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer,Integer,Integer,Integer,Integer,Integer>> {
 	
 	@Override
-	public Tuple6<Integer,Integer,Long,Integer,Integer,Integer> map(Tuple8<Integer, Integer, Integer, Long, Integer, Boolean, Integer, Integer> in) throws Exception {
+	public Tuple6<Integer,Integer,Integer,Integer,Integer,Integer> map(Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> in) throws Exception {
 		// TODO Auto-generated method stub
-		return new Tuple6<Integer,Integer,Long,Integer,Integer,Integer>(in.f0,in.f1,in.f3,in.f6,in.f7,in.f2);
+		return new Tuple6<Integer,Integer,Integer,Integer,Integer,Integer>(in.f0,in.f1,in.f3,in.f6,in.f7,in.f2);
 	}
 
 
