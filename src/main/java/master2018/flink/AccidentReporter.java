@@ -23,38 +23,38 @@ public class AccidentReporter implements
 			Iterable<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> input,
 			Collector<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> out) throws Exception {
 
-		System.out.println("  ");
-		System.out.println("TUPLE KEY " + key.toString());
-		System.out.println("input " + input.toString());
+//		System.out.println("  ");
+//		System.out.println("TUPLE KEY " + key.toString());
+//		System.out.println("input " + input.toString());
 		// collector se va rellenando e itera desde el principio de nuevo
 		Iterator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> iterator = input
 				.iterator();
 
 		Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> first = iterator.next();
-		System.out.println(" ");
-		System.out.println("First " + first.toString());
+//		System.out.println(" ");
+//		System.out.println("First " + first.toString());
 		int elements = 1;
 
 		Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> tmp = null;
 
 		while (iterator.hasNext()) {
 			elements++;
-			System.out.println("ELEMENTS " + elements);
+//			System.out.println("ELEMENTS " + elements);
 
 			Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> currentElement = iterator
 					.next();
-			System.out.println("--> Current " + currentElement.toString());
+//			System.out.println("--> Current " + currentElement.toString());
 
 			int previous_position;
 			int current_position;
 			if (elements == 2) {
 				if (first.f7.equals(currentElement.f7)) {
-					System.out.println("-----> E2 " + "     " + first.f7 + "   " + currentElement.f7 + " : "
-							+ (first.f7.equals(currentElement.f7)));
+//					System.out.println("-----> E2 " + "     " + first.f7 + "   " + currentElement.f7 + " : "
+//							+ (first.f7.equals(currentElement.f7)));
 					tmp = currentElement;
 				}
 				else {
-					System.out.println("-E2  NULO");
+//					System.out.println("-E2  NULO");
 					tmp = null;
 				}
 
@@ -62,30 +62,34 @@ public class AccidentReporter implements
 			// 157437
 
 			else if (elements == 3 && tmp != null) {
-				System.out.println("-----> E3 " + "     " + tmp.f7 + "   " + currentElement.f7 + " : "
-						+ (tmp.f7.equals(currentElement.f7)));
+//				System.out.println("-----> E3 " + "     " + tmp.f7 + "   " + currentElement.f7 + " : "
+//						+ (tmp.f7.equals(currentElement.f7)));
 				if (tmp.f7.equals(currentElement.f7)) {
 
 					tmp = currentElement;
 				} else {
-					System.out.println(" -->NO E3 ");
+//					System.out.println(" -->NO E3 ");
 					tmp = null;
 				}
 
 			}
 
-			else if (elements == 4 && tmp != null && tmp.f7.equals(currentElement.f7)) {
-				System.out.println("****** Meeting Conditions " + tmp.toString());
-				Integer time1 = first.f0;
-				Integer time2 = currentElement.f0;
-				Integer vid = currentElement.f1;
-				Integer xWay = currentElement.f3;
-				Integer seg = currentElement.f6;
-				Integer dir = currentElement.f5;
-				Integer pos = currentElement.f7;
-				Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> outTuple = new Tuple7(time1,
-						time2, vid, xWay, seg, dir, pos);
-				out.collect(outTuple);
+			else if (elements == 4 && tmp != null) {
+//				System.out.println("$ENTRO CUATRO FOR " +currentElement.f1+"  tmp.f7 "+tmp.f7 +"  currentElement.f7  "+ currentElement.f7);
+				if (tmp.f7.equals(currentElement.f7)) {
+//					System.out.println("****** Meeting Conditions " + tmp.toString());
+					Integer time1 = first.f0;
+					Integer time2 = currentElement.f0;
+					Integer vid = currentElement.f1;
+					Integer xWay = currentElement.f3;
+					Integer seg = currentElement.f6;
+					Integer dir = currentElement.f5;
+					Integer pos = currentElement.f7;
+					Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer> outTuple = new Tuple7(time1,
+							time2, vid, xWay, seg, dir, pos);
+					out.collect(outTuple);
+				}
+				
 			}
 
 		}

@@ -13,7 +13,12 @@ import java.util.Iterator;
 public class AverageSpeedControl implements WindowFunction<
         Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer, Integer, Integer, Integer, Integer, Double>,
         Tuple, TimeWindow> {
-    @Override
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Override
     public void apply(Tuple key, TimeWindow window, Iterable<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> input,
                       Collector<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> out) throws Exception {
         Iterator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> iterator = input.iterator();

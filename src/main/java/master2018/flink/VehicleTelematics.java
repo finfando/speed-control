@@ -31,11 +31,11 @@ public class VehicleTelematics {
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-		 String inFilePath = args[0];
-		 String outFilePath=args[1];
+		// String inFilePath = args[0];
+		 //String outFilePath=args[1];
 
-		//String inFilePath = "/home/yoss/Escritorio/traffic-3xways";
-		//String outFilePath = "/home/yoss/Escritorio";
+		String inFilePath = "/home/yoss/Escritorio/miniTestSame.txt";
+		String outFilePath = "/home/yoss/Escritorio";
 
 		DataStreamSource<String> source = env.readTextFile(inFilePath).setParallelism(1);
 		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> mapStream = source
@@ -71,7 +71,7 @@ public class VehicleTelematics {
 		SingleOutputStreamOperator<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> accidentReporter = keyedStreamByVID
 				.countWindow(4, 1).apply(new AccidentReporter());
 
-		accidentReporter.writeAsCsv(outFilePath + "/accidents.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+				accidentReporter.writeAsCsv(outFilePath + "/accidents.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 	
 
 		try {
