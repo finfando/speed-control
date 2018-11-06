@@ -13,6 +13,11 @@ import org.apache.flink.util.Collector;
 public class AccidentReporter implements
 		WindowFunction<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple, GlobalWindow> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 11L;
+
 	@Override
 	public void apply(Tuple key, GlobalWindow window,
 			Iterable<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> input,

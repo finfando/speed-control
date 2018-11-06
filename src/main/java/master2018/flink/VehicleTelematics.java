@@ -31,21 +31,21 @@ public class VehicleTelematics {
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-		// String inFilePath = args[0];
-		// String outFilePath=args[1];
+		 String inFilePath = args[0];
+		 String outFilePath=args[1];
 
-		String inFilePath = "/home/yoss/Escritorio/samePosition.txt";
-		String outFilePath = "/home/yoss/Escritorio";
+		//String inFilePath = "/home/yoss/Escritorio/traffic-3xways";
+		//String outFilePath = "/home/yoss/Escritorio";
 
 		DataStreamSource<String> source = env.readTextFile(inFilePath).setParallelism(1);
 		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> mapStream = source
-				.map(new MapImplementation());
+				.map(new MapImplementation()).setParallelism(1);
 
 		// Time, VID, Spd, XWay, Lane, Dir, Seg, Pos
 
 		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> speedRadar = mapStream
 				.filter(new SpeedRadar()).map(new FlatMapOutput());
-		//speedRadar.writeAsCsv(outFilePath + "/speedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+		speedRadar.writeAsCsv(outFilePath + "/speedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
 		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> filteredStream = mapStream
 				.filter(new FilterBySegment());
@@ -64,7 +64,7 @@ public class VehicleTelematics {
 		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> result = keyedStream
 				.window(EventTimeSessionWindows.withGap(Time.minutes(1))).apply(new AverageSpeedControl()); // Time1,
 																											// Time2,VID,XWay,Dir,AvgSpd
-		//result.writeAsCsv(outFilePath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+		result.writeAsCsv(outFilePath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
 		KeyedStream<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream
 				.keyBy(1);
@@ -72,6 +72,7 @@ public class VehicleTelematics {
 				.countWindow(4, 1).apply(new AccidentReporter());
 
 		accidentReporter.writeAsCsv(outFilePath + "/accidents.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+	
 
 		try {
 			env.execute();
