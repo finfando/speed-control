@@ -31,7 +31,7 @@ public class VehicleTelematics {
 		speedRadar.writeAsCsv(outFilePath + "/speedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
 		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> filteredStream = mapStream
-				.filter(new FilterBySegment());
+				.filter(new FilterBySegment()).setParallelism(1);
 		KeyedStream<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStream = filteredStream
 				.assignTimestampsAndWatermarks(
 						new AscendingTimestampExtractor<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
@@ -41,7 +41,7 @@ public class VehicleTelematics {
 									Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> element) {
 								return element.f0 * 1000;
 							}
-						})
+						}).setParallelism(1)
 				.keyBy(1);
 		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> result = keyedStream
 				.window(EventTimeSessionWindows.withGap(Time.minutes(1))).apply(new AverageSpeedControl());
