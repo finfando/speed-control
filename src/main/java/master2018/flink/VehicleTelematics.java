@@ -12,6 +12,7 @@ import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindow
 import org.apache.flink.streaming.api.windowing.time.Time;
 
 import master2018.flink.utils.FilterBySegment;
+import master2018.flink.utils.FilterBySpeed;
 
 public class VehicleTelematics {
 	public static void main(String[] args) throws Exception {
@@ -47,7 +48,7 @@ public class VehicleTelematics {
 				.window(EventTimeSessionWindows.withGap(Time.minutes(1))).apply(new AverageSpeedControl());
 		result.writeAsCsv(outFilePath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
-		KeyedStream<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream
+		KeyedStream<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream.filter(new FilterBySpeed())
 				.keyBy(1);
 		SingleOutputStreamOperator<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> accidentReporter = keyedStreamByVID
 				.countWindow(4, 1).apply(new AccidentReporter());
