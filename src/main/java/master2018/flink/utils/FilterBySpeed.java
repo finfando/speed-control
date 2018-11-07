@@ -10,10 +10,6 @@ public class FilterBySpeed
 	@Override
 	public boolean filter(Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> in)
 			throws Exception {
-		if (in.f2 == 0) {
-			return true;
-		} else {
-			return false;
-		}
+		return in.f2 == 0;
 	}
 }
