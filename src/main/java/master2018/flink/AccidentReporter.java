@@ -13,10 +13,7 @@ import org.apache.flink.util.Collector;
 public class AccidentReporter implements
 		WindowFunction<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple, GlobalWindow> {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 11L;
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public void apply(Tuple key, GlobalWindow window,
@@ -45,18 +42,17 @@ public class AccidentReporter implements
 					.next();
 //			System.out.println("--> Current " + currentElement.toString());
 
-			int previous_position;
-			int current_position;
+			
 			if (elements == 2) {
 				if (first.f7.equals(currentElement.f7)) {
 //					System.out.println("-----> E2 " + "     " + first.f7 + "   " + currentElement.f7 + " : "
 //							+ (first.f7.equals(currentElement.f7)));
 					tmp = currentElement;
 				}
-				else {
-//					System.out.println("-E2  NULO");
-					tmp = null;
-				}
+//				else {
+//				System.out.println("-E2  NULO");
+//					tmp = null;
+//				}
 
 			}
 			// 157437
@@ -67,10 +63,10 @@ public class AccidentReporter implements
 				if (tmp.f7.equals(currentElement.f7)) {
 
 					tmp = currentElement;
-				} else {
-//					System.out.println(" -->NO E3 ");
-					tmp = null;
 				}
+//				else {
+//					tmp = null;
+//				}
 
 			}
 

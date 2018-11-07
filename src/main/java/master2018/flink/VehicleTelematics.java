@@ -31,11 +31,11 @@ public class VehicleTelematics {
 		final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 		env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-		// String inFilePath = args[0];
-		 //String outFilePath=args[1];
+		 String inFilePath = args[0];
+		 String outFilePath=args[1];
 
-		String inFilePath = "/home/yoss/Escritorio/miniTestSame.txt";
-		String outFilePath = "/home/yoss/Escritorio";
+		//String inFilePath = "/home/yoss/Escritorio/miniTestSame.txt";
+		//String outFilePath = "/home/yoss/Escritorio";
 
 		DataStreamSource<String> source = env.readTextFile(inFilePath).setParallelism(1);
 		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> mapStream = source
@@ -53,6 +53,11 @@ public class VehicleTelematics {
 		KeyedStream<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStream = filteredStream
 				.assignTimestampsAndWatermarks(
 						new AscendingTimestampExtractor<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
+							/**
+							 * 
+							 */
+							private static final long serialVersionUID = 1L;
+
 							@Override
 							public long extractAscendingTimestamp(
 									Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> element) {

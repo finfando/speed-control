@@ -12,6 +12,11 @@ import org.apache.flink.util.Collector;
 public class FlatMapOutput
 		implements MapFunction<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer,Integer,Integer,Integer,Integer,Integer>> {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public Tuple6<Integer,Integer,Integer,Integer,Integer,Integer> map(Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> in) throws Exception {
 		// TODO Auto-generated method stub
