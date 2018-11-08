@@ -1,5 +1,6 @@
 package master2018.flink;
 
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.*;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -11,6 +12,7 @@ import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExt
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
+import master2018.flink.*;
 import master2018.flink.utils.FilterBySegment;
 import master2018.flink.utils.FilterBySpeed;
 
@@ -37,22 +39,37 @@ public class VehicleTelematics {
 				.assignTimestampsAndWatermarks(
 						new AscendingTimestampExtractor<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
 							private static final long serialVersionUID = 1L;
+
 							@Override
 							public long extractAscendingTimestamp(
 									Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> element) {
 								return element.f0 * 1000;
 							}
-						}).setParallelism(1)
-				.keyBy(1);
+						})
+				.setParallelism(1).keyBy(1);
+
 		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> result = keyedStream
-				.window(EventTimeSessionWindows.withGap(Time.minutes(1))).apply(new AverageSpeedControl());
+				.window(EventTimeSessionWindows.withGap(Time.seconds(180))).apply(new AverageSpeedControl());
 		result.writeAsCsv(outFilePath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
-		KeyedStream<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream.filter(new FilterBySpeed())
-				.keyBy(1);
+		KeyedStream<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream
+				.filter(new FilterBySpeed())
+				.map(new MapFunction<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>>() {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> map(
+							Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> in)
+							throws Exception { // time vid xway seg dir pos
+
+						return new Tuple6<>(in.f0, in.f1, in.f3, in.f5, in.f6, in.f7); // T8 Time0, VID1,Spd2, XWay3,
+																						// Lane4,Dir5, Seg6, Pos7
+					}
+				}).keyBy(1);
+
 		SingleOutputStreamOperator<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> accidentReporter = keyedStreamByVID
 				.countWindow(4, 1).apply(new AccidentReporter());
-        accidentReporter.writeAsCsv(outFilePath + "/accidents.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+		accidentReporter.writeAsCsv(outFilePath + "/accidents.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
 		try {
 			env.execute();

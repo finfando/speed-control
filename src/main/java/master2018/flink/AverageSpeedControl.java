@@ -53,6 +53,7 @@ public class AverageSpeedControl implements WindowFunction<
         if ((seg1==52 || seg1==56) && (seg2==52 || seg2==56) && (seg1!=seg2) && (avgspeed > 60.0)) {
 //            Time1, Time2, VID, XWay, Dir, AvgSpd
             out.collect(new Tuple6<>(time1, time2, vid, xway, dir, avgspeed));
+            
         }
     }
 }
