@@ -35,15 +35,15 @@ public class VehicleTelematics {
 
 		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> filteredStream = mapStream
                 .map(new MapFunction<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>>() {
-					private static final long serialVersionUID = 1L;
-					@Override
-					public Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> map(
-							Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> in)
-							throws Exception { // time vid xway seg dir pos
+                    private static final long serialVersionUID = 1L;
+                    @Override
+                    public Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> map(
+                            Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> in)
+                            throws Exception { // time vid xway seg dir pos
                         return new Tuple6<>(in.f0, in.f1, in.f3, in.f5, in.f6, in.f7); // T8 Time0, VID1,Spd2, XWay3,
                         // Lane4,Dir5, Seg6, Pos7
                     }
-				})
+                }).setParallelism(1)
                 .filter(new FilterBySegment()).setParallelism(1)
                 ;
 
