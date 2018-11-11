@@ -48,9 +48,9 @@ public class VehicleTelematics {
 						})
 				.setParallelism(1).keyBy(1);
 
-		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> result = keyedStream
+		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> avgSpeedControl = keyedStream
 				.window(EventTimeSessionWindows.withGap(Time.seconds(180))).apply(new AverageSpeedControl());
-		result.writeAsCsv(outFilePath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
+		avgSpeedControl.writeAsCsv(outFilePath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
 		KeyedStream<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream
 				.filter(new FilterBySpeed())
