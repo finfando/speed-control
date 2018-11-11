@@ -11,7 +11,7 @@ import org.apache.flink.util.Collector;
 import java.util.Iterator;
 
 public class AverageSpeedControl implements WindowFunction<
-        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer, Integer, Integer, Integer, Integer, Double>,
+        Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer, Integer, Integer, Integer, Integer, Double>,
         Tuple, TimeWindow> {
     /**
 	 * 
@@ -19,10 +19,10 @@ public class AverageSpeedControl implements WindowFunction<
 	private static final long serialVersionUID = 1L;
 
 	@Override
-    public void apply(Tuple key, TimeWindow window, Iterable<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> input,
+    public void apply(Tuple key, TimeWindow window, Iterable<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> input,
                       Collector<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> out) throws Exception {
-        Iterator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> iterator = input.iterator();
-        Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> first = iterator.next();
+        Iterator<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> iterator = input.iterator();
+        Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> first = iterator.next();
         Integer time1 = 0;
         Integer time2 = 0;
         Double timediff = 0.0;
@@ -37,16 +37,16 @@ public class AverageSpeedControl implements WindowFunction<
         if(first != null){
             time1 = first.f0;
             vid = first.f1;
-            pos1 = first.f7;
-            seg1 = first.f6;
-            xway = first.f3;
-            dir = first.f5;
+            pos1 = first.f5;
+            seg1 = first.f4;
+            xway = first.f2;
+            dir = first.f3;
         }
         while(iterator.hasNext()){
-            Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> next = iterator.next();
+            Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> next = iterator.next();
             time2 = next.f0;
-            pos2 = next.f7;
-            seg2 = next.f6;
+            pos2 = next.f5;
+            seg2 = next.f4;
             timediff = 1.0*(time2-time1)/3600;
             avgspeed = Math.abs(pos1-pos2)/1609.344/timediff;
         }
