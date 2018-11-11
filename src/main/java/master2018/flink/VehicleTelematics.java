@@ -55,7 +55,7 @@ public class VehicleTelematics {
 
 		KeyedStream<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream
 				.filter(new FilterBySpeed())
-				.map(new ReduceTuplesNumber()).keyBy(1);
+				.map(new ReduceTuplesNumber()).keyBy(1, 3);
 
 		SingleOutputStreamOperator<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> accidentReporter = keyedStreamByVID
 				.countWindow(4, 1).apply(new AccidentReporter());
