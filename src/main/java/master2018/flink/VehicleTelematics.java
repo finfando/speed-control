@@ -33,12 +33,9 @@ public class VehicleTelematics {
 				.filter(new SpeedRadar()).map(new FlatMapOutput());
 		speedRadar.writeAsCsv(outFilePath + "/speedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
-		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> filteredStream = mapStream
+		KeyedStream<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStream = mapStream
                 .filter(new FilterBySegment()).setParallelism(1)
-                ;
-
-		KeyedStream<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStream = filteredStream
-				.assignTimestampsAndWatermarks(
+                .assignTimestampsAndWatermarks(
 						new AscendingTimestampExtractor<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>>() {
 							private static final long serialVersionUID = 1L;
 
@@ -60,7 +57,7 @@ public class VehicleTelematics {
                 .keyBy(1, 3);
 
 		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> avgSpeedControl = keyedStream
-				.window(EventTimeSessionWindows.withGap(Time.seconds(180))).apply(new AverageSpeedControl());
+				.window(EventTimeSessionWindows.withGap(Time.seconds(600))).apply(new AverageSpeedControl());
 		avgSpeedControl.writeAsCsv(outFilePath + "/avgspeedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
 		KeyedStream<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream
