@@ -28,7 +28,8 @@ public class AverageSpeedControl implements WindowFunction<
         Double timediff = 0.0;
         Integer vid = 0;
         Integer xway = 0;
-        Integer dir = 0;
+        Integer dir1 = 0;
+        Integer dir2 = null;
         Integer pos1 = 0;
         Integer pos2 = 0;
         Double avgspeed = 0.0;
@@ -40,19 +41,23 @@ public class AverageSpeedControl implements WindowFunction<
             pos1 = first.f5;
             seg1 = first.f4;
             xway = first.f2;
-            dir = first.f3;
+            dir1 = first.f3;
         }
         while(iterator.hasNext()){
             Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> next = iterator.next();
             time2 = next.f0;
             pos2 = next.f5;
             seg2 = next.f4;
+            dir2 = next.f3;
+            if(dir1 != dir2) {
+                break;
+            }
             timediff = 1.0*(time2-time1)/3600;
             avgspeed = Math.abs(pos1-pos2)/1609.344/timediff;
         }
         if ((seg1==52 || seg1==56) && (seg2==52 || seg2==56) && (seg1!=seg2) && (avgspeed > 60.0)) {
 //            Time1, Time2, VID, XWay, Dir, AvgSpd
-            out.collect(new Tuple6<>(time1, time2, vid, xway, dir, avgspeed));
+            out.collect(new Tuple6<>(time1, time2, vid, xway, dir1, avgspeed));
             
         }
     }
