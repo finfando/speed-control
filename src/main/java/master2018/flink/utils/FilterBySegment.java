@@ -9,6 +9,6 @@ public class FilterBySegment
 	@Override
 	public boolean filter(Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> in)
 			throws Exception {
-		return in.f6 >= 52 && in.f6 <= 56;
+		return in.f6 == 52 || in.f6 == 56;
 	}
 }
