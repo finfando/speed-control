@@ -34,8 +34,7 @@ public class VehicleTelematics {
 		speedRadar.writeAsCsv(outFilePath + "/speedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
 
 		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> filteredStream = mapStream
-                .filter(new FilterBySegment()).setParallelism(1)
-                ;
+                .filter(new FilterBySegment()).setParallelism(1);
 
 		KeyedStream<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStream = filteredStream
 				.assignTimestampsAndWatermarks(
