@@ -1,6 +1,6 @@
 package master2018.flink;
 
-import org.apache.flink.api.common.functions.MapFunction;
+
 import org.apache.flink.api.java.tuple.*;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -12,9 +12,9 @@ import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExt
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
-import master2018.flink.*;
 import master2018.flink.utils.FilterBySegment;
 import master2018.flink.utils.FilterBySpeed;
+import master2018.flink.utils.ReduceTuplesNumber;
 
 public class VehicleTelematics {
 	public static void main(String[] args) throws Exception {
@@ -27,8 +27,7 @@ public class VehicleTelematics {
 		DataStreamSource<String> source = env.readTextFile(inFilePath).setParallelism(1);
 		SingleOutputStreamOperator<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>> mapStream = source
 				.map(new MapImplementation()).setParallelism(1);
-		// Time, VID, Spd, XWay, Lane, Dir, Seg, Pos
-
+		
 		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>> speedRadar = mapStream
 				.filter(new SpeedRadar()).map(new FlatMapOutput());
 		speedRadar.writeAsCsv(outFilePath + "/speedfines.csv", FileSystem.WriteMode.OVERWRITE).setParallelism(1);
@@ -47,15 +46,7 @@ public class VehicleTelematics {
 								return element.f0 * 1000;
 							}
 						}).setParallelism(1)
-                .map(new MapFunction<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>>() {
-                    private static final long serialVersionUID = 1L;
-                    @Override
-                    public Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> map(
-                            Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> in)
-                            throws Exception {
-                        return new Tuple6<>(in.f0, in.f1, in.f3, in.f5, in.f6, in.f7);
-                    }
-                }).setParallelism(1)
+                .map(new ReduceTuplesNumber()).setParallelism(1)
                 .keyBy(1, 3);
 
 		SingleOutputStreamOperator<Tuple6<Integer, Integer, Integer, Integer, Integer, Double>> avgSpeedControl = keyedStream
@@ -64,18 +55,7 @@ public class VehicleTelematics {
 
 		KeyedStream<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple> keyedStreamByVID = mapStream
 				.filter(new FilterBySpeed())
-				.map(new MapFunction<Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>>() {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					public Tuple6<Integer, Integer, Integer, Integer, Integer, Integer> map(
-							Tuple8<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> in)
-							throws Exception { // time vid xway seg dir pos
-
-						return new Tuple6<>(in.f0, in.f1, in.f3, in.f5, in.f6, in.f7); // T8 Time0, VID1,Spd2, XWay3,
-																						// Lane4,Dir5, Seg6, Pos7
-					}
-				}).keyBy(1);
+				.map(new ReduceTuplesNumber()).keyBy(1);
 
 		SingleOutputStreamOperator<Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>> accidentReporter = keyedStreamByVID
 				.countWindow(4, 1).apply(new AccidentReporter());
@@ -87,5 +67,5 @@ public class VehicleTelematics {
 			e.printStackTrace();
 		}
 
-	}
+	} 
 }
