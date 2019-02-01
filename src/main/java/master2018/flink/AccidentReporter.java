@@ -11,6 +11,10 @@ import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
+/**This class implements the WindowFunction to detect an accident if a cars is stopped for more than 4 consecutive events
+ * Input:  Tuple6 <Tuple6<Time, VID, XWay, Dir, Seg,Pos>
+ * Output: Tuple7<Time first event,Time 4th event, VID, XWay, Seg, Dir,Pos>
+ */
 public class AccidentReporter implements
 		WindowFunction<Tuple6<Integer, Integer, Integer, Integer, Integer, Integer>, Tuple7<Integer, Integer, Integer, Integer, Integer, Integer, Integer>, Tuple, GlobalWindow> {
 
